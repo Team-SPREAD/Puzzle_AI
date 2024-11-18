@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [22.9.0]
+        python-version: [3.13]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -30,7 +30,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKER_IMAGE_NAME }}:latest
-          push-args: --disable-content-trust
 
   deploy:
     needs: build
@@ -40,12 +39,10 @@ jobs:
         uses: appleboy/ssh-action@v0.1.10
         with:
           username: ${{ secrets.USERNAME }}
-          host: ${{ secrets.HOST }} #hostIP
+          host: ${{ secrets.HOST }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd server
             docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_PASSWORD }}
-            docker system prune -a --volumes -f
-            docker compose pull -q
-            docker compose up --force-recreate --build -d --quiet-pull 2>log.out
-            cat log.out
+            docker compose pull
+            docker compose up --force-recreate --build -d

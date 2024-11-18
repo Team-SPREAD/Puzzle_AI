@@ -1,5 +1,5 @@
-# 1. Python 베이스 이미지 설정 (Python 3.11 사용)
-FROM python:3.11-slim
+# 1. Python 베이스 이미지 설정 (Python 3.13 사용)
+FROM python:3.13-slim
 
 # 2. 작업 디렉토리 설정
 WORKDIR /app
