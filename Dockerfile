@@ -7,8 +7,8 @@ WORKDIR /app
 # 3. 의존성 목록 복사
 COPY requirements.txt .
 
-# 4. Python 패키지 설치
-RUN pip3 install --no-cache-dir -r requirements.txt
+# pip 및 Python 패키지 설치
+RUN pip install --upgrade pip setuptools wheel && pip install --no-cache-dir -r requirements.txt
 
 # 5. 소스 코드 복사
 COPY . .
