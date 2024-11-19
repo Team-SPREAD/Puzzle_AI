@@ -9,14 +9,24 @@ class LangchainService:
             openai_api_key=os.getenv("OPENAI_API_KEY"),
             temperature=0.7,
         )
-
-    def generate_description(self, extracted_text: str) -> str:
-        prompt = PromptTemplate(
+        self.prompt_template = PromptTemplate(
             template=(
-                "다음 텍스트가 이미지에서 추출되었습니다: {extracted_text}. "
-                "이 텍스트를 기반으로 이미지를 설명하는 마크다운 문서를 작성하세요."
+                "다음 텍스트를 기반으로 Markdown 문서를 작성하세요:\n"
+                "- 단계: {step_number}\n"
+                "- 설명: {step_description}\n"
+                "- 이미지 분석 결과: {extracted_text}\n"
+                "- 이미지 URL: {image_url}\n"
+                "\nMarkdown 결과를 반환하세요."
             ),
-            input_variables=["extracted_text"],
+            input_variables=["step_number", "step_description", "extracted_text", "image_url"],
         )
-        chain = LLMChain(llm=self.llm, prompt=prompt)
-        return chain.run(extracted_text=extracted_text)
+
+    def generate_description(self, step_number, step_description, extracted_text, image_url):
+        chain = LLMChain(llm=self.llm, prompt=self.prompt_template)
+        return chain.run(
+            step_number=step_number,
+            step_description=step_description,
+            extracted_text=extracted_text,
+            image_url=image_url,
+        )
+
