@@ -30,6 +30,7 @@ async def analyze_images(request: ImageAnalysisRequest):
     service = LangchainService()
     markdown_results = []
 
+    # 1단계: 각 이미지에서 Markdown 생성
     for idx, image_url in enumerate(request.imageUrls):
         step_number = idx + 3
         try:
@@ -50,11 +51,22 @@ async def analyze_images(request: ImageAnalysisRequest):
                 f"### {step_number}단계\nError processing image at {image_url}: {str(e)}"
             )
 
+    # Markdown 결과를 결합
     combined_markdown = "\n\n".join(markdown_results)
 
+    # 2단계: 프로젝트 기획서 생성
     try:
-        second_result = service.generate_second_result(markdown_content=combined_markdown)
+        project_plan = service.generate_second_result(markdown_content=combined_markdown)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating second result: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating project plan: {str(e)}")
 
-    return {"result": second_result}
+    # 3단계: 요구사항 명세서 추가
+    try:
+        requirements_spec = service.generate_third_result(markdown_content=combined_markdown)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating requirements spec: {str(e)}")
+
+    # 최종 결과 반환 (Markdown + 프로젝트 기획서 + 요구사항 명세서)
+    final_result = f"{combined_markdown}\n\n# 프로젝트 기획서\n\n{project_plan}\n\n# 요구사항 명세서\n\n{requirements_spec}"
+
+    return {"result": final_result}
